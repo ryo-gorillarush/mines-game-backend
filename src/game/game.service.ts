@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { placeMines } from './utils';
 import { multiplier5x5Table } from '../multipliers/5x5-multiplier';
@@ -122,14 +122,30 @@ export class GameService {
   }
 
   private calculateTotalWinningAmount(): number {
-    const hasPlayerWon = this.gridTable.every(
-      (row, rowIndex) =>
-        row.every(
-          (item, colIndex) =>
-            item.isRevealed === this.minesMap[rowIndex][colIndex].isMine,
-        ),
+    const { revealedNonMines, revealedMines } = this.gridTable.flat().reduce(
+      (acc, item, index) => {
+        if (item.isRevealed) {
+          const isMine = this.minesMap[Math.floor(index / this.gridSize)][index % this.gridSize].isMine;
+          isMine ? acc.revealedMines++ : acc.revealedNonMines++;
+        }
+        return acc;
+      },
+      { revealedNonMines: 0, revealedMines: 0 },
     );
 
+    const hasPlayerWon = revealedMines === 0 && revealedNonMines > 0;
     return hasPlayerWon ? this.betAmount * this.currentMultiply : 0;
+  }
+
+  cashout(): RevealedResultResponse {
+    /*cashout process*/
+    const checkWinning = true;
+    const cashoutProcess = true;
+
+    const gameResult = this.getGameResult();
+    if (checkWinning && cashoutProcess) {
+
+      return gameResult;
+    } else throw new ForbiddenException();
   }
 }

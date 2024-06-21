@@ -34,4 +34,9 @@ export class GameController {
   revealResult(): RevealedResultResponse {
     return this.gameService.getGameResult();
   }
+
+  @Post('cashout')
+  cashout() {
+    return this.gameService.cashout();
+  }
 }
